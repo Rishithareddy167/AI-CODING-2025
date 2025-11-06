@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compression Demo & Code Ethics Discussion</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --surface: #ffffff;
+            --text: #1f2937;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .demo-container {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .side-by-side {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .image-container {
+            text-align: center;
+        }
+        .image-container canvas {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e5e7eb;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .code-block {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .attribution {
+            font-size: 0.9em;
+            color: #64748b;
+            border-left: 3px solid var(--primary);
+            padding-left: 1em;
+            margin: 1em 0;
+        }
+        .warning {
+            background: #fff7ed;
+            border: 1px solid #fdba74;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Compression Demo & Code Ethics Discussion</h1>
+    
+    <div class="demo-container">
+        <h2>Browser-based Image Compression Demo</h2>
+        <p>Upload an image to see client-side compression in action. The demo shows both original and compressed versions with size comparison.</p>
+        
+        <div class="controls">
+            <input type="file" id="imageInput" accept="image/*">
+            <button id="compressBtn" disabled>Compress Image</button>
+            <label>
+                Quality:
+                <input type="range" id="qualitySlider" min="0" max="1" step="0.1" value="0.7">
+                <span id="qualityValue">0.7</span>
+            </label>
+        </div>
+
+        <div class="side-by-side">
+            <div class="image-container">
+                <h3>Original</h3>
+                <canvas id="originalCanvas"></canvas>
+                <p>Size: <span id="originalSize">-</span></p>
+            </div>
+            <div class="image-container">
+                <h3>Compressed</h3>
+                <canvas id="compressedCanvas"></canvas>
+                <p>Size: <span id="compressedSize">-</span></p>
+            </div>
+        </div>
+    </div>
+
+    <section>
+        <h2>Code Attribution & Ethics Discussion</h2>
+        
+        <h3>How Copyright Violations Affect Developers</h3>
+        <ul>
+            <li><strong>Economic Impact:</strong> When code is used without proper licensing or attribution, developers lose potential revenue from their work, discouraging innovation and maintenance of open-source projects.</li>
+            <li><strong>Professional Recognition:</strong> Missing attributions deny developers credit for their contributions, affecting their professional growth and community standing.</li>
+            <li><strong>Legal Consequences:</strong> Companies using unattributed code risk lawsuits, license violations, and reputation damage.</li>
+            <li><strong>Community Trust:</strong> Misuse of code without attribution erodes trust in the development community and discourages sharing.</li>
+        </ul>
+
+        <div class="warning">
+            <h4>⚠️ Important Note on Code Reuse</h4>
+            <p>The image compression implementation below is original code written for this demo, using standard Web APIs. 
+            When adapting code from other sources, always:</p>
+            <ul>
+                <li>Check and comply with the original code's license</li>
+                <li>Maintain copyright notices and attribution comments</li>
+                <li>Document any modifications made to the original code</li>
+            </ul>
+        </div>
+
+        <h3>Best Practices for Attribution with AI-Generated Code</h3>
+        <ol>
+            <li><strong>Document AI Usage:</strong> Clearly indicate when code was generated or influenced by AI tools in comments or documentation.</li>
+            <li><strong>Verify Licenses:</strong> AI models may be trained on various licensed code. Review and verify the licensing implications of generated code.</li>
+            <li><strong>Add Human Review:</strong> Always review AI-generated code for quality, security, and potential licensing issues.</li>
+            <li><strong>Maintain Transparency:</strong> Document both AI assistance and human modifications in version control commits.</li>
+            <li><strong>Include Proper Attribution:</strong> When AI generates code similar to known libraries, cite both the AI tool and the potential original sources.</li>
+        </ol>
+
+        <div class="attribution">
+            <p><strong>Demo Implementation Note:</strong><br>
+            The code below uses standard Web APIs (Canvas, File, Blob) for image compression. 
+            While the implementation pattern is common, this specific code is written as an 
+            original example for educational purposes. The technique of using canvas for image 
+            compression is a widely-known approach in web development.</p>
+        </div>
+
+        <div class="code-block">
+            <pre><code>// Original image compression implementation using Web APIs
+async function compressImage(file, quality = 0.7) {
+    // Create an image bitmap from the file
+    const bitmap = await createImageBitmap(file);
+    
+    // Set up canvas with image dimensions
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    
+    // Draw image to canvas
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0);
+    
+    // Convert to compressed JPEG data URL
+    const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+    
+    // Convert base64 to Blob for size comparison
+    const compressedBlob = await (await fetch(compressedDataUrl)).blob();
+    
+    return {
+        dataUrl: compressedDataUrl,
+        size: compressedBlob.size,
+        width: bitmap.width,
+        height: bitmap.height
+    };
+}</code></pre>
+        </div>
+    </section>
+
+    <script>
+        // UI Elements
+        const imageInput = document.getElementById('imageInput');
+        const compressBtn = document.getElementById('compressBtn');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValue = document.getElementById('qualityValue');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const compressedCanvas = document.getElementById('compressedCanvas');
+        const originalSize = document.getElementById('originalSize');
+        const compressedSize = document.getElementById('compressedSize');
+
+        // Original implementation of image compression using Web APIs
+        async function compressImage(file, quality = 0.7) {
+            const bitmap = await createImageBitmap(file);
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(bitmap, 0, 0);
+            
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            const compressedBlob = await (await fetch(compressedDataUrl)).blob();
+            
+            return {
+                dataUrl: compressedDataUrl,
+                size: compressedBlob.size,
+                width: bitmap.width,
+                height: bitmap.height
+            };
+        }
+
+        // Display image on canvas
+        async function displayImage(canvas, dataUrl) {
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.src = dataUrl;
+            await new Promise(resolve => img.onload = resolve);
+            
+            // Maintain aspect ratio within max dimensions
+            const maxWidth = 400;
+            const maxHeight = 300;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > maxWidth) {
+                height = (maxWidth * height) / width;
+                width = maxWidth;
+            }
+            if (height > maxHeight) {
+                width = (maxHeight * width) / height;
+                height = maxHeight;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+        }
+
+        // Format file size
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Event Handlers
+        imageInput.addEventListener('change', async (e) => {
+            if (e.target.files && e.target.files[0]) {
+                compressBtn.disabled = false;
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    await displayImage(originalCanvas, e.target.result);
+                    originalSize.textContent = formatSize(file.size);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        compressBtn.addEventListener('click', async () => {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            const quality = parseFloat(qualitySlider.value);
+            const result = await compressImage(file, quality);
+            
+            await displayImage(compressedCanvas, result.dataUrl);
+            compressedSize.textContent = formatSize(result.size);
+        });
+
+        qualitySlider.addEventListener('input', (e) => {
+            qualityValue.textContent = e.target.value;
+        });
+    </script>
+</body>
+</html>

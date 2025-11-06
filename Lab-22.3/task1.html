@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Accessible Multilingual Support Chatbot</title>
+	<style>
+		:root{
+			--bg:#ffffff; --fg:#111827; --accent:#0b5fff; --muted:#6b7280;
+		}
+		[data-contrast="high"]{
+			--bg:#000000; --fg:#ffffff; --accent:#ffd166; --muted:#f0f0f0;
+		}
+		body{font-family:Segoe UI, Roboto, Arial, sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:16px}
+		.container{max-width:900px;margin:0 auto}
+		header{display:flex;align-items:center;justify-content:space-between}
+		h1{font-size:1.3rem;margin:0}
+		.chat{border:1px solid #ddd;border-radius:8px;padding:12px;margin-top:12px;background:rgba(255,255,255,.02)}
+		.messages{height:320px;overflow:auto;padding:8px;border-radius:4px;background:linear-gradient(#fff,#fafafa);}
+		.message{margin:6px 0;padding:8px;border-radius:6px;max-width:80%}
+		.bot{background:#f3f4f6;color:#111}
+		.user{background:var(--accent);color:white;margin-left:auto}
+		.controls{display:flex;gap:8px;align-items:center;margin-top:8px}
+		select,input[type=text]{padding:8px;border-radius:6px;border:1px solid #ccc}
+		button{padding:8px 12px;border-radius:6px;border:none;background:var(--accent);color:white;cursor:pointer}
+		.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+		.settings{display:flex;gap:8px;align-items:center}
+		[data-large="true"]{font-size:1.25rem}
+		#test-results{margin-top:12px;padding:8px;border-radius:6px;background:#f8fafc;border:1px solid #e6eef8}
+		.pass{color:green}
+		.fail{color:red}
+		.discussion{margin-top:18px;padding:12px;border-radius:8px;background:#fffef6;border:1px solid #fff1c2}
+	</style>
+</head>
+<body>
+	<div class="container" id="page">
+		<header>
+			<h1>Accessible Multilingual Support Chatbot</h1>
+			<div class="settings" aria-hidden="false">
+				<label for="lang">Language</label>
+				<select id="lang" aria-label="Choose chatbot language">
+					<option value="en">English</option>
+					<option value="es">Español</option>
+					<option value="zh">中文</option>
+					<option value="te">తెలుగు</option>
+					<option value="hi">हिंदी</option>
+					<option value="ta">தமிழ்</option>
+				</select>
+			</div>
+		</header>
+
+		<section class="chat" aria-label="Customer support chat">
+			<div id="notifications" class="sr-only" role="status" aria-live="polite"></div>
+
+			<div id="messages" class="messages" role="log" aria-live="polite" tabindex="0"></div>
+
+			<div class="controls" role="group" aria-label="Chat controls">
+				<input id="input" type="text" aria-label="Type your message" placeholder="Type a message and press Enter" />
+				<button id="send">Send</button>
+				<button id="tts-toggle" aria-pressed="false">TTS: Off</button>
+				<button id="contrast-toggle" aria-pressed="false">High contrast</button>
+				<button id="large-toggle" aria-pressed="false">Large text</button>
+				<button id="run-tests">Run tests</button>
+			</div>
+
+			<div id="test-results" aria-live="polite" aria-atomic="true"></div>
+		</section>
+
+		<section class="discussion" aria-label="Discussion on accessibility and ethics">
+			<h2>Digital inequality & accessibility — short discussion</h2>
+			<p>
+				Lack of inclusivity in digital products creates digital inequality by excluding people with disabilities, those using other languages, and those with older devices or low-bandwidth connections.
+				When customer support systems assume a single language or rely only on visuals and small touch targets, they prevent many from accessing services, information, and economic opportunities.
+			</p>
+			<h3>Ethical ways to ensure accessibility in AI-generated systems</h3>
+			<ul>
+				<li>Design from the start for accessibility (WCAG) and test with real assistive tech and with diverse users.</li>
+				<li>Provide language alternatives and avoid over-reliance on a single translation service — allow localised content and human review.</li>
+				<li>Offer non-visual channels (ARIA, screen-reader-friendly markup, and speech/voice access) and low-bandwidth fallbacks (text-only mode).</li>
+				<li>Be transparent about AI limits and provide easy escalation to a human agent.</li>
+				<li>Regularly audit models and content for bias and for harms that might disproportionately affect marginalized groups.</li>
+			</ul>
+			<p>See the embedded tests to try language handling and basic accessibility checks.</p>
+		</section>
+	</div>
+
+	<script>
+		// Small in-page chatbot with multilingual canned responses and accessibility features.
+		const messagesEl = document.getElementById('messages');
+		const inputEl = document.getElementById('input');
+		const sendBtn = document.getElementById('send');
+		const langSel = document.getElementById('lang');
+		const ttsBtn = document.getElementById('tts-toggle');
+		const contrastBtn = document.getElementById('contrast-toggle');
+		const largeBtn = document.getElementById('large-toggle');
+		const runTestsBtn = document.getElementById('run-tests');
+		const testResults = document.getElementById('test-results');
+		const page = document.getElementById('page');
+
+		const translations = {
+			en: {hello: 'Hello! How can I help you?', order: 'You can check your order status at: https://example.com/orders', fallback: "I'm sorry, can you rephrase that?"},
+			es: {hello: '¡Hola! ¿En qué puedo ayudarte?', order: 'Puedes consultar el estado de tu pedido en: https://example.com/orders', fallback: 'Lo siento, ¿puedes reformularlo?'},
+			zh: {hello: '您好！我能帮您做什么？', order: '您可以在此处查看订单状态: https://example.com/orders', fallback: '抱歉，您能换一种说法吗？'},
+			te: {hello: 'నమస్కారం! నేను మీకు ఎలా సహాయం చేయగలను?', order: 'మీ ఆర్డర్ స్థితిని ఇక్కడ తనిఖీ చేయవచ్చు: https://example.com/orders', fallback: 'క్షమించండి, దయచేసి మళ్ళీ చెప్పగలరు?'},
+			hi: {hello: 'नमस्ते! मैं आपकी कैसे मदद कर सकता हूं?', order: 'आप अपने ऑर्डर की स्थिति यहां देख सकते हैं: https://example.com/orders', fallback: 'क्षमा करें, क्या आप इसे दोहरा सकते हैं?'},
+			ta: {hello: 'வணக்கம்! நான் உங்களுக்கு எப்படி உதவ முடியும்?', order: 'உங்கள் ஆர்டர் நிலையை இங்கே பார்க்கலாம்: https://example.com/orders', fallback: 'மன்னிக்கவும், அதை மீண்டும் சொல்ல முடியுமா?'}
+		};
+
+		function appendMessage(text, cls, ariaLabel) {
+			const div = document.createElement('div');
+			div.className = 'message ' + cls;
+			div.textContent = text;
+			if (ariaLabel) div.setAttribute('aria-label', ariaLabel);
+			messagesEl.appendChild(div);
+			messagesEl.scrollTop = messagesEl.scrollHeight;
+		}
+
+		function botReply(userText) {
+			const lang = langSel.value;
+			const lower = userText.toLowerCase();
+			let reply = translations[lang].fallback;
+			if (/hello|hi|hey|hola|您好|你好|నమస్కారం|నమస్తే|नमस्ते|नमस्कार|வணக்கம்/.test(lower)) reply = translations[lang].hello;
+			if (/order|pedido|orden|订单/.test(lower)) reply = translations[lang].order;
+			// Simple canned reply
+			appendMessage(reply, 'bot', 'bot message');
+			announceForScreenReader(reply);
+			if (ttsEnabled) speak(reply, lang);
+		}
+
+		function announceForScreenReader(text) {
+			// Keep a polite live region that screen readers will announce
+			const live = document.getElementById('notifications');
+			live.textContent = text;
+		}
+
+		// Basic speech (Web Speech API) support
+		let ttsEnabled = false;
+		function speak(text, lang) {
+			if (!('speechSynthesis' in window)) return;
+			const utter = new SpeechSynthesisUtterance(text);
+			// map language codes to voice lang hints
+			const langMap = {
+				zh: 'zh-CN', es: 'es-ES', te: 'te-IN', 
+				hi: 'hi-IN', ta: 'ta-IN', en: 'en-US'
+			};
+			utter.lang = langMap[lang] || 'en-US';
+			window.speechSynthesis.cancel();
+			window.speechSynthesis.speak(utter);
+		}
+
+		sendBtn.addEventListener('click', () => {
+			const txt = inputEl.value.trim();
+			if (!txt) return;
+			appendMessage(txt, 'user', 'you said: ' + txt);
+			inputEl.value = '';
+			inputEl.focus();
+			setTimeout(() => botReply(txt), 250);
+		});
+
+		inputEl.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') { e.preventDefault(); sendBtn.click(); }
+		});
+
+		langSel.addEventListener('change', () => {
+			// greet in new language
+			appendMessage(translations[langSel.value].hello, 'bot', 'bot greeting');
+		});
+
+		ttsBtn.addEventListener('click', () => {
+			ttsEnabled = !ttsEnabled;
+			ttsBtn.textContent = 'TTS: ' + (ttsEnabled ? 'On' : 'Off');
+			ttsBtn.setAttribute('aria-pressed', String(ttsEnabled));
+		});
+
+		contrastBtn.addEventListener('click', () => {
+			const isHigh = page.getAttribute('data-contrast') === 'high';
+			page.setAttribute('data-contrast', isHigh ? 'normal' : 'high');
+			contrastBtn.setAttribute('aria-pressed', String(!isHigh));
+		});
+
+		largeBtn.addEventListener('click', () => {
+			const toggled = page.getAttribute('data-large') === 'true';
+			page.setAttribute('data-large', toggled ? 'false' : 'true');
+			if (!toggled) document.documentElement.setAttribute('data-large', 'true'); else document.documentElement.removeAttribute('data-large');
+			largeBtn.setAttribute('aria-pressed', String(!toggled));
+		});
+
+		// Initial greeting
+		appendMessage(translations[langSel.value].hello, 'bot', 'bot greeting');
+
+		// In-page test runner
+		function assert(cond, message) {
+			return {ok: !!cond, message};
+		}
+
+		async function runTests() {
+			testResults.innerHTML = 'Running tests...';
+			const results = [];
+
+			// Test 1: presence of ARIA live region
+			const live = document.querySelector('#messages[aria-live]');
+			results.push(assert(!!live, 'Messages container has aria-live')); 
+
+			// Test 2: language handling
+			const langTests = [
+				{lang:'en',in:'Hello',expect:translations.en.hello},
+				{lang:'es',in:'Hola',expect:translations.es.hello},
+				{lang:'zh',in:'你好',expect:translations.zh.hello},
+				{lang:'te',in:'నమస్కారం',expect:translations.te.hello},
+				{lang:'hi',in:'नमस्ते',expect:translations.hi.hello},
+				{lang:'ta',in:'வணக்கம்',expect:translations.ta.hello}
+			];
+
+			for (const t of langTests) {
+				langSel.value = t.lang; // change language
+				// send programmatically
+				appendMessage('> ' + t.in, 'user', 'test user input');
+				await new Promise(r => setTimeout(r, 200));
+				// trigger bot reply directly for deterministic test
+				const idxBefore = messagesEl.children.length;
+				botReply(t.in);
+				await new Promise(r => setTimeout(r, 300));
+				const last = messagesEl.lastElementChild ? messagesEl.lastElementChild.textContent : '';
+				results.push(assert(last && last.indexOf(t.expect.substring(0,6)) !== -1, `Bot responded in ${t.lang}`));
+			}
+
+			// Test 3: TTS availability
+			const hasTTS = 'speechSynthesis' in window;
+			results.push(assert(typeof hasTTS === 'boolean', 'SpeechSynthesis API detected flag')); 
+
+			// Render results
+			testResults.innerHTML = '';
+			let passCount = 0;
+			results.forEach((r, i) => {
+				const p = document.createElement('div');
+				p.textContent = `Test ${i+1}: ${r.message} — ${r.ok ? 'PASS' : 'FAIL'}`;
+				p.className = r.ok ? 'pass' : 'fail';
+				testResults.appendChild(p);
+				if (r.ok) passCount++;
+			});
+			const summary = document.createElement('div');
+			summary.style.marginTop='8px';
+			summary.textContent = `Passed ${passCount} / ${results.length} tests.`;
+			testResults.appendChild(summary);
+		}
+
+		runTestsBtn.addEventListener('click', runTests);
+
+		// Expose a minimal API for programmatic testing or embedding
+		window.simpleSupportBot = {
+			send: (text) => { appendMessage(text, 'user'); botReply(text); },
+			setLanguage: (l) => { langSel.value = l; }
+		};
+	</script>
+</body>
+</html>

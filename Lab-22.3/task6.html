@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Energy Impact & Developer Responsibility</title>
+    <style>
+        :root {
+            --primary: #059669;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --surface: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            color: var(--text);
+        }
+        .eco-notice {
+            background: #ecfdf5;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .visualization {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .metric-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .metric-label {
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .slider-container {
+            margin: 20px 0;
+        }
+        .slider-label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .impact-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        .impact-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        canvas {
+            max-width: 100%;
+        }
+        .practice-list {
+            list-style: none;
+            padding: 0;
+        }
+        .practice-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .practice-item h4 {
+            margin: 0 0 10px 0;
+            color: var(--primary);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #f8fafc;
+        }
+        .trade-off {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Code Assistance: Environmental Impact & Developer Responsibility</h1>
+
+    <div class="eco-notice">
+        <h2>🌱 Environmental Impact Awareness</h2>
+        <p>This interactive demonstration helps visualize the environmental impact of large-scale AI code assistance systems and explores sustainable development practices.</p>
+    </div>
+
+    <div class="visualization">
+        <h2>AI Energy Consumption Simulator</h2>
+        
+        <div class="slider-container">
+            <label class="slider-label">
+                Daily Active Users (millions)
+                <input type="range" id="userSlider" min="1" max="50" value="10">
+                <span id="userValue">10M</span>
+            </label>
+        </div>
+
+        <div class="slider-container">
+            <label class="slider-label">
+                Average Requests per User per Day
+                <input type="range" id="requestSlider" min="10" max="500" value="100">
+                <span id="requestValue">100</span>
+            </label>
+        </div>
+
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-value" id="energyValue">0</div>
+                <div class="metric-label">Daily Energy Consumption (kWh)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="carbonValue">0</div>
+                <div class="metric-label">Carbon Footprint (kg CO₂e/day)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="treeValue">0</div>
+                <div class="metric-label">Trees needed for offset (yearly)</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="impactChart"></canvas>
+        </div>
+    </div>
+
+    <section>
+        <h2>Environmental Responsibility in AI Development</h2>
+
+        <h3>The Scale of Impact</h3>
+        <table>
+            <tr>
+                <th>AI System Component</th>
+                <th>Energy Impact</th>
+                <th>Optimization Potential</th>
+            </tr>
+            <tr>
+                <td>Model Training</td>
+                <td>Very High (One-time)</td>
+                <td>
+                    <ul>
+                        <li>Efficient architectures</li>
+                        <li>Transfer learning</li>
+                        <li>Targeted datasets</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>Inference/Deployment</td>
+                <td>Moderate (Ongoing)</td>
+                <td>
+                    <ul>
+                        <li>Model compression</li>
+                        <li>Caching</li>
+                        <li>Batching</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>Data Centers</td>
+                <td>High (Infrastructure)</td>
+                <td>
+                    <ul>
+                        <li>Green energy sources</li>
+                        <li>Cooling optimization</li>
+                        <li>Load balancing</li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+
+        <h3>Ethical Responsibility for Sustainability</h3>
+        <div class="practice-list">
+            <div class="practice-item">
+                <h4>Professional Obligation</h4>
+                <p>Developers have a responsibility to consider the environmental impact of their technical decisions, just as they consider security and performance. This includes:</p>
+                <ul>
+                    <li>Understanding energy implications of architectural choices</li>
+                    <li>Measuring and monitoring environmental impact</li>
+                    <li>Implementing energy-efficient practices</li>
+                    <li>Educating stakeholders about sustainability trade-offs</li>
+                </ul>
+            </div>
+            
+            <div class="practice-item">
+                <h4>Economic Benefits</h4>
+                <p>Environmental responsibility often aligns with economic interests:</p>
+                <ul>
+                    <li>Lower operational costs</li>
+                    <li>Improved system efficiency</li>
+                    <li>Better resource utilization</li>
+                    <li>Enhanced brand reputation</li>
+                </ul>
+            </div>
+
+            <div class="practice-item">
+                <h4>Global Impact</h4>
+                <p>The collective impact of AI systems is significant:</p>
+                <ul>
+                    <li>Growing energy demand from AI services</li>
+                    <li>Increasing carbon footprint of data centers</li>
+                    <li>Resource consumption for hardware manufacturing</li>
+                    <li>E-waste from regular hardware upgrades</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>Balancing Performance vs Environmental Cost</h3>
+        
+        <div class="trade-off">
+            <h4>Performance Optimization Strategies</h4>
+            <ul>
+                <li><strong>Model Efficiency:</strong> Use smaller, optimized models when possible</li>
+                <li><strong>Caching:</strong> Implement intelligent caching for common requests</li>
+                <li><strong>Resource Scheduling:</strong> Batch processing during off-peak hours</li>
+                <li><strong>Hardware Selection:</strong> Choose energy-efficient computing resources</li>
+            </ul>
+        </div>
+
+        <div class="trade-off">
+            <h4>Environmental Optimization Strategies</h4>
+            <ul>
+                <li><strong>Green Energy:</strong> Use data centers powered by renewable energy</li>
+                <li><strong>Load Distribution:</strong> Distribute workload to minimize energy usage</li>
+                <li><strong>Code Optimization:</strong> Write energy-efficient code</li>
+                <li><strong>Resource Monitoring:</strong> Track and optimize resource usage</li>
+            </ul>
+        </div>
+
+        <h3>Practical Guidelines for Sustainable AI Development</h3>
+        <ol>
+            <li><strong>Measure Impact:</strong> Implement energy usage monitoring and reporting</li>
+            <li><strong>Set Goals:</strong> Establish concrete sustainability targets</li>
+            <li><strong>Optimize Early:</strong> Consider efficiency during design phase</li>
+            <li><strong>Regular Review:</strong> Continuously assess and improve energy efficiency</li>
+            <li><strong>Education:</strong> Train teams on sustainable development practices</li>
+        </ol>
+    </section>
+
+    <script>
+        // Energy consumption simulation
+        const userSlider = document.getElementById('userSlider');
+        const requestSlider = document.getElementById('requestSlider');
+        const userValue = document.getElementById('userValue');
+        const requestValue = document.getElementById('requestValue');
+        const energyValue = document.getElementById('energyValue');
+        const carbonValue = document.getElementById('carbonValue');
+        const treeValue = document.getElementById('treeValue');
+
+        // Constants for calculation (estimated values)
+        const ENERGY_PER_REQUEST = 0.0006; // kWh per request
+        const CARBON_PER_KWH = 0.5; // kg CO2 per kWh
+        const TREE_OFFSET_PER_YEAR = 25; // kg CO2 per tree per year
+
+        function updateImpact() {
+            const users = parseInt(userSlider.value);
+            const requests = parseInt(requestSlider.value);
+            
+            // Daily calculations
+            const dailyRequests = users * requests * 1000000; // Convert to millions
+            const dailyEnergy = dailyRequests * ENERGY_PER_REQUEST;
+            const dailyCarbon = dailyEnergy * CARBON_PER_KWH;
+            const yearlyCarbon = dailyCarbon * 365;
+            const treesNeeded = Math.ceil(yearlyCarbon / TREE_OFFSET_PER_YEAR);
+            
+            // Update display
+            userValue.textContent = users + 'M';
+            requestValue.textContent = requests;
+            energyValue.textContent = dailyEnergy.toLocaleString(undefined, {maximumFractionDigits: 0});
+            carbonValue.textContent = dailyCarbon.toLocaleString(undefined, {maximumFractionDigits: 0});
+            treeValue.textContent = treesNeeded.toLocaleString();
+        }
+
+        userSlider.addEventListener('input', updateImpact);
+        requestSlider.addEventListener('input', updateImpact);
+
+        // Initialize values
+        updateImpact();
+    </script>
+</body>
+</html>

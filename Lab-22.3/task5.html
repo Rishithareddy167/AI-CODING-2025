@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explainable AI Loan Assessment System</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --success: #059669;
+            --surface: #ffffff;
+            --text: #1f2937;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            color: var(--text);
+        }
+        .ethics-notice {
+            background: #fff7ed;
+            border: 2px solid var(--warning);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .application-form {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .explanation-card {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .factor-list {
+            list-style: none;
+            padding: 0;
+        }
+        .factor-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .factor-weight {
+            margin-left: auto;
+            font-weight: 500;
+        }
+        .score-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .score-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+        .decision-breakdown {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .metric {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .metric-label {
+            flex: 1;
+        }
+        .metric-value {
+            font-weight: 500;
+        }
+        .risk-level {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        .risk-low { background: #dcfce7; color: #166534; }
+        .risk-medium { background: #fff7ed; color: #9a3412; }
+        .risk-high { background: #fee2e2; color: #991b1b; }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #f8fafc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Explainable AI Loan Assessment System</h1>
+
+    <div class="ethics-notice">
+        <h2>⚠️ Transparency in AI Financial Decisions</h2>
+        <p>This is an educational demonstration showing how AI loan decisions can be made transparent and explainable. Key principles:</p>
+        <ul>
+            <li>All factors influencing decisions are clearly shown</li>
+            <li>Users can understand how their information affects the outcome</li>
+            <li>Decision process follows fair lending practices</li>
+            <li>System provides actionable feedback for improvement</li>
+        </ul>
+    </div>
+
+    <div class="application-form">
+        <h2>Loan Application Demo</h2>
+        <form id="loanForm">
+            <div class="form-group">
+                <label for="income">Annual Income ($)</label>
+                <input type="number" id="income" required min="0" step="1000" value="50000">
+            </div>
+            <div class="form-group">
+                <label for="creditScore">Credit Score</label>
+                <input type="number" id="creditScore" required min="300" max="850" value="700">
+            </div>
+            <div class="form-group">
+                <label for="employment">Years of Employment</label>
+                <input type="number" id="employment" required min="0" step="0.5" value="5">
+            </div>
+            <div class="form-group">
+                <label for="debt">Monthly Debt Payments ($)</label>
+                <input type="number" id="debt" required min="0" step="100" value="1000">
+            </div>
+            <div class="form-group">
+                <label for="loanAmount">Requested Loan Amount ($)</label>
+                <input type="number" id="loanAmount" required min="1000" step="1000" value="200000">
+            </div>
+            <button type="submit">Analyze Application</button>
+        </form>
+    </div>
+
+    <div id="results" style="display: none;">
+        <div class="explanation-card">
+            <h3>Decision Explanation</h3>
+            <p id="decisionSummary"></p>
+            
+            <div class="decision-breakdown">
+                <h4>Factor Analysis</h4>
+                <ul class="factor-list" id="factorList"></ul>
+                
+                <div class="metric">
+                    <span class="metric-label">Overall Risk Score</span>
+                    <span class="metric-value" id="riskScore"></span>
+                </div>
+                <div class="score-bar">
+                    <div class="score-fill" id="riskBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="explanation-card">
+            <h3>Improvement Recommendations</h3>
+            <ul id="recommendations"></ul>
+        </div>
+    </div>
+
+    <section>
+        <h2>Understanding AI Decision Transparency</h2>
+
+        <h3>Risks of "Black Box" AI Decisions</h3>
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>Risk Category</th>
+                    <th>Impact</th>
+                    <th>Mitigation Strategy</th>
+                </tr>
+                <tr>
+                    <td>Discrimination</td>
+                    <td>Hidden biases in training data may lead to unfair treatment of certain groups</td>
+                    <td>
+                        <ul>
+                            <li>Regular bias audits</li>
+                            <li>Diverse training data</li>
+                            <li>Clear factor weighting</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Legal Compliance</td>
+                    <td>Inability to justify decisions may violate fair lending laws</td>
+                    <td>
+                        <ul>
+                            <li>Document decision factors</li>
+                            <li>Regular compliance reviews</li>
+                            <li>Audit trails</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Customer Trust</td>
+                    <td>Lack of transparency leads to reduced trust and adoption</td>
+                    <td>
+                        <ul>
+                            <li>Clear explanations</li>
+                            <li>Factor breakdowns</li>
+                            <li>Improvement guidance</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Error Detection</td>
+                    <td>Difficult to identify and correct system mistakes</td>
+                    <td>
+                        <ul>
+                            <li>Regular monitoring</li>
+                            <li>Human oversight</li>
+                            <li>Appeal process</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3>How Explainability Ensures Fairness</h3>
+        <ol>
+            <li><strong>Transparency in Criteria</strong>
+                <ul>
+                    <li>All decision factors are clearly documented</li>
+                    <li>Factor weights are explicitly shown</li>
+                    <li>Impact of each input is quantified</li>
+                </ul>
+            </li>
+            <li><strong>Actionable Feedback</strong>
+                <ul>
+                    <li>Clear improvement recommendations</li>
+                    <li>Specific steps for better outcomes</li>
+                    <li>Timeline for improvements</li>
+                </ul>
+            </li>
+            <li><strong>Equal Treatment Verification</strong>
+                <ul>
+                    <li>Consistent application of criteria</li>
+                    <li>Regular bias testing</li>
+                    <li>Demographic impact analysis</li>
+                </ul>
+            </li>
+            <li><strong>Appeal and Recourse</strong>
+                <ul>
+                    <li>Clear process for disputes</li>
+                    <li>Human review availability</li>
+                    <li>Documentation requirements</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <script>
+        // Loan assessment system with explainable decisions
+        const form = document.getElementById('loanForm');
+        const results = document.getElementById('results');
+        const decisionSummary = document.getElementById('decisionSummary');
+        const factorList = document.getElementById('factorList');
+        const riskScore = document.getElementById('riskScore');
+        const riskBar = document.getElementById('riskBar');
+        const recommendations = document.getElementById('recommendations');
+
+        // Factor weights and thresholds for transparency
+        const RISK_FACTORS = {
+            dti: { name: 'Debt-to-Income Ratio', weight: 0.3, threshold: 0.43 },
+            credit: { name: 'Credit Score', weight: 0.3, threshold: 640 },
+            employment: { name: 'Employment History', weight: 0.2, threshold: 2 },
+            loanToIncome: { name: 'Loan-to-Income Ratio', weight: 0.2, threshold: 4 }
+        };
+
+        function calculateMetrics(data) {
+            const monthlyIncome = data.income / 12;
+            const dti = data.debt / monthlyIncome;
+            const loanToIncome = data.loanAmount / data.income;
+            
+            return {
+                dti,
+                loanToIncome,
+                creditScore: data.creditScore,
+                employmentYears: data.employment
+            };
+        }
+
+        function assessRisk(metrics) {
+            let riskFactors = [];
+            let score = 0;
+            const maxScore = 100;
+
+            // DTI assessment (lower is better)
+            const dtiScore = Math.max(0, 100 * (1 - metrics.dti / RISK_FACTORS.dti.threshold));
+            riskFactors.push({
+                name: RISK_FACTORS.dti.name,
+                score: dtiScore,
+                weight: RISK_FACTORS.dti.weight,
+                message: `DTI ratio is ${(metrics.dti * 100).toFixed(1)}%`
+            });
+
+            // Credit score assessment
+            const creditScore = ((metrics.creditScore - 300) / (850 - 300)) * 100;
+            riskFactors.push({
+                name: RISK_FACTORS.credit.name,
+                score: creditScore,
+                weight: RISK_FACTORS.credit.weight,
+                message: `Credit score is ${metrics.creditScore}`
+            });
+
+            // Employment history
+            const empScore = Math.min(100, (metrics.employmentYears / RISK_FACTORS.employment.threshold) * 100);
+            riskFactors.push({
+                name: RISK_FACTORS.employment.name,
+                score: empScore,
+                weight: RISK_FACTORS.employment.weight,
+                message: `${metrics.employmentYears} years of employment`
+            });
+
+            // Loan to income ratio (lower is better)
+            const ltiScore = Math.max(0, 100 * (1 - metrics.loanToIncome / RISK_FACTORS.loanToIncome.threshold));
+            riskFactors.push({
+                name: RISK_FACTORS.loanToIncome.name,
+                score: ltiScore,
+                weight: RISK_FACTORS.loanToIncome.weight,
+                message: `Loan is ${metrics.loanToIncome.toFixed(1)}x annual income`
+            });
+
+            // Calculate weighted score
+            score = riskFactors.reduce((acc, factor) => {
+                return acc + (factor.score * factor.weight);
+            }, 0);
+
+            return {
+                score,
+                factors: riskFactors,
+                approved: score >= 70,
+                riskLevel: score >= 80 ? 'low' : score >= 60 ? 'medium' : 'high'
+            };
+        }
+
+        function generateRecommendations(assessment, metrics) {
+            const recommendations = [];
+            
+            if (metrics.dti > RISK_FACTORS.dti.threshold) {
+                recommendations.push(
+                    'Reduce monthly debt payments or increase income to improve debt-to-income ratio'
+                );
+            }
+            
+            if (metrics.creditScore < RISK_FACTORS.credit.threshold) {
+                recommendations.push(
+                    'Work on improving credit score through timely payments and reducing credit utilization'
+                );
+            }
+            
+            if (metrics.employmentYears < RISK_FACTORS.employment.threshold) {
+                recommendations.push(
+                    'Consider applying after establishing longer employment history'
+                );
+            }
+            
+            if (metrics.loanToIncome > RISK_FACTORS.loanToIncome.threshold) {
+                recommendations.push(
+                    'Consider a smaller loan amount relative to annual income'
+                );
+            }
+            
+            return recommendations;
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const data = {
+                income: Number(document.getElementById('income').value),
+                creditScore: Number(document.getElementById('creditScore').value),
+                employment: Number(document.getElementById('employment').value),
+                debt: Number(document.getElementById('debt').value),
+                loanAmount: Number(document.getElementById('loanAmount').value)
+            };
+
+            const metrics = calculateMetrics(data);
+            const assessment = assessRisk(metrics);
+            
+            // Display results
+            results.style.display = 'block';
+            
+            // Update summary
+            decisionSummary.innerHTML = `
+                Application Status: <strong>${assessment.approved ? 'Preliminarily Approved' : 'Needs Review'}</strong>
+                <span class="risk-level risk-${assessment.riskLevel}">
+                    ${assessment.riskLevel.charAt(0).toUpperCase() + assessment.riskLevel.slice(1)} Risk
+                </span>
+            `;
+            
+            // Update factor breakdown
+            factorList.innerHTML = assessment.factors.map(factor => `
+                <li class="factor-item">
+                    <div>
+                        <strong>${factor.name}</strong>
+                        <div>${factor.message}</div>
+                    </div>
+                    <span class="factor-weight">
+                        Score: ${factor.score.toFixed(1)}
+                        (${(factor.weight * 100)}% weight)
+                    </span>
+                </li>
+            `).join('');
+            
+            // Update risk score
+            riskScore.textContent = `${assessment.score.toFixed(1)}/100`;
+            riskBar.style.width = `${assessment.score}%`;
+            
+            // Update recommendations
+            const improvementTips = generateRecommendations(assessment, metrics);
+            recommendations.innerHTML = improvementTips.map(tip => `<li>${tip}</li>`).join('');
+        });
+    </script>
+</body>
+</html>
